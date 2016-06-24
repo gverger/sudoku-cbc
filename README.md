@@ -1,8 +1,6 @@
 # Sudoku::Cbc
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/sudoku/cbc`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This is a simple example of using the `ruby-cbc` gem for solving a sudoku instance
 
 ## Installation
 
@@ -20,10 +18,6 @@ Or install it yourself as:
 
     $ gem install sudoku-cbc
 
-## Usage
-
-TODO: Write usage instructions here
-
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
@@ -32,7 +26,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/sudoku-cbc.
+Bug reports and pull requests are welcome on GitHub at https://github.com/gverger/sudoku-cbc.
 
 
 ## License
