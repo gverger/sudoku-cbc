@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/gverger/sudoku-cbc.svg?branch=master)](https://travis-ci.org/gverger/sudoku-cbc)
 # Sudoku::Cbc
 
 This is a simple example of using the `ruby-cbc` gem for solving a sudoku instance
