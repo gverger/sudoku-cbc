@@ -60,7 +60,7 @@ module Sudoku
         one_value_constraints(model, vars_boards)
         row_constraints(model, vars_boards)
         col_constraints(model, vars_boards)
-        block_constraints(model, vars_boards)
+        box_constraints(model, vars_boards)
       end
 
       def one_value_constraints(model, vars_boards)
@@ -76,8 +76,7 @@ module Sudoku
       def row_constraints(model, vars_boards)
         vars_boards.each_with_index do |var_board, index|
           value = index + 1
-          (0..8).each do |row|
-            row_vars = (0..8).map { |col| var_board[row, col] }
+          var_board.row_values.each_with_index do |row_vars, row|
             constraint_name = "value #{value} must be present once in row #{row}"
             model.enforce(constraint_name => row_vars.inject(:+) == 1)
           end
@@ -87,35 +86,19 @@ module Sudoku
       def col_constraints(model, vars_boards)
         vars_boards.each_with_index do |var_board, index|
           value = index + 1
-          (0..8).each do |col|
-            col_vars = (0..8).map { |row| var_board[row, col] }
+          var_board.col_values.each_with_index do |col_vars, col|
             constraint_name = "value #{value} must be present once in col #{col}"
             model.enforce(constraint_name => col_vars.inject(:+) == 1)
           end
         end
       end
 
-      def blocks
-        blocks =[]
-        rows_cols = [0, 1, 2].repeated_permutation(2)
-        rows_cols.each do |brow, bcol|
-          block = []
-          rows_cols.each do |row, col|
-            block << [row + 3 * brow, col + 3 * bcol]
-          end
-          blocks << block
-        end
-        blocks
-      end
-
-      def block_constraints(model, vars_boards)
-        index_blocks = blocks
+      def box_constraints(model, vars_boards)
         vars_boards.each_with_index do |var_board, index|
           value = index + 1
-          index_blocks.each do |block|
-            block_vars = block.map { |row, col| var_board[row, col] }
-            constraint_name = "value #{value} must be present once in block #{block.first}-#{block.last}"
-            model.enforce(constraint_name => block_vars.inject(:+) == 1)
+          var_board.box_values.each_with_index do |box_vars, box|
+            constraint_name = "value #{value} must be present once in box #{box}"
+            model.enforce(constraint_name => box_vars.inject(:+) == 1)
           end
         end
       end

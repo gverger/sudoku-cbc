@@ -18,6 +18,23 @@ module Sudoku
         board[a][b] = value
       end
 
+      def row_values
+        board
+      end
+
+      def col_values
+        (0..8).map { |col| board.map { |row| row[col] } }
+      end
+
+      def box_values
+        blocks =[]
+        rows_cols = [0, 1, 2].repeated_permutation(2)
+        rows_cols.each do |brow, bcol|
+          blocks << rows_cols.map { |row, col| board[row + 3 * brow][col + 3 * bcol] }
+        end
+        blocks
+      end
+
       def self.from_string(string)
         board = new
         row = 0
