@@ -1,7 +1,7 @@
 module Sudoku
   module Cbc
     class Problem
-      attr_accessor :initial_board, :vars, :problem
+      attr_accessor :initial_board, :vars_boards, :problem
       def initialize(board)
         @initial_board = board
       end
@@ -21,7 +21,7 @@ module Sudoku
 
       def solution_board
         sol = Board.new
-        vars.each_with_index do |var_board, index|
+        vars_boards.each_with_index do |var_board, index|
           value = index + 1
           (0..8).each do |row|
             (0..8).each do |col|
@@ -35,16 +35,16 @@ module Sudoku
       def create_problem
         model = ::Cbc::Model.new
 
-        @vars = init_vars(model)
-        init_constraints(model, vars)
+        @vars_boards = init_vars(model)
+        init_constraints(model, vars_boards)
         @problem = model.to_problem
       end
 
       def init_vars(model)
-        vars = []
+        vars_boards = []
         (1..9).each do |value|
           vars_board = Board.new
-          vars << vars_board
+          vars_boards << vars_board
           (0..8).each do |row|
             (0..8).each do |col|
               vars_board[row, col] = model.bin_var(name: "x_#{row}_#{col}_#{value}")
@@ -53,28 +53,28 @@ module Sudoku
             end
           end
         end
-        vars
+        vars_boards
       end
 
-      def init_constraints(model, vars)
-        one_value_constraints(model, vars)
-        row_constraints(model, vars)
-        col_constraints(model, vars)
-        block_constraints(model, vars)
+      def init_constraints(model, vars_boards)
+        one_value_constraints(model, vars_boards)
+        row_constraints(model, vars_boards)
+        col_constraints(model, vars_boards)
+        block_constraints(model, vars_boards)
       end
 
-      def one_value_constraints(model, vars)
+      def one_value_constraints(model, vars_boards)
         (0..8).each do |row|
           (0..8).each do |col|
-            values_vars = vars.map { |board| board[row, col] }
+            values_vars = vars_boards.map { |board| board[row, col] }
             constraint_name = "one value must be chosen for (#{row}, #{col})"
             model.enforce(constraint_name => values_vars.inject(:+) == 1)
           end
         end
       end
 
-      def row_constraints(model, vars)
-        vars.each_with_index do |var_board, index|
+      def row_constraints(model, vars_boards)
+        vars_boards.each_with_index do |var_board, index|
           value = index + 1
           (0..8).each do |row|
             row_vars = (0..8).map { |col| var_board[row, col] }
@@ -84,8 +84,8 @@ module Sudoku
         end
       end
 
-      def col_constraints(model, vars)
-        vars.each_with_index do |var_board, index|
+      def col_constraints(model, vars_boards)
+        vars_boards.each_with_index do |var_board, index|
           value = index + 1
           (0..8).each do |col|
             col_vars = (0..8).map { |row| var_board[row, col] }
@@ -108,9 +108,9 @@ module Sudoku
         blocks
       end
 
-      def block_constraints(model, vars)
+      def block_constraints(model, vars_boards)
         index_blocks = blocks
-        vars.each_with_index do |var_board, index|
+        vars_boards.each_with_index do |var_board, index|
           value = index + 1
           index_blocks.each do |block|
             block_vars = block.map { |row, col| var_board[row, col] }
