@@ -41,22 +41,31 @@ module Sudoku
       end
 
       def init_vars(model)
-        vars_boards = []
-        (1..9).each do |value|
-          vars_board = Board.new
-          vars_boards << vars_board
-          (0..8).each do |row|
-            (0..8).each do |col|
-              vars_board[row, col] = model.bin_var(name: "x_#{row}_#{col}_#{value}")
-              fixed_value = initial_board[row, col]
-              model.enforce("initial value (#{row}, #{col}) <- #{value}":vars_board[row, col] == 1) if fixed_value == value
+        9.times.map do
+          Board.new.tap do |board|
+            (0..8).each do |row|
+              (0..8).each do |col|
+                board[row, col] = model.bin_var
+              end
             end
           end
         end
-        vars_boards
+      end
+
+      def initial_values(model, vars_boards)
+        initial_board.row_values.each_with_index do |values, row|
+          (0..8).each do |col|
+            value = initial_board[row, col]
+            next if value.nil?
+            var = vars_boards[value - 1][row, col]
+            model.enforce("initial value (#{row}, #{col}) <- #{value}": var == 1)
+          end
+        end
+
       end
 
       def init_constraints(model, vars_boards)
+        initial_values(model, vars_boards)
         one_value_constraints(model, vars_boards)
         row_constraints(model, vars_boards)
         col_constraints(model, vars_boards)
@@ -76,8 +85,8 @@ module Sudoku
       def row_constraints(model, vars_boards)
         vars_boards.each_with_index do |var_board, index|
           value = index + 1
-          var_board.row_values.each_with_index do |row_vars, row|
-            constraint_name = "value #{value} must be present once in row #{row}"
+          var_board.row_values.each do |row_vars|
+            constraint_name = "value #{value} must be present once per row"
             model.enforce(constraint_name => row_vars.inject(:+) == 1)
           end
         end
@@ -86,8 +95,8 @@ module Sudoku
       def col_constraints(model, vars_boards)
         vars_boards.each_with_index do |var_board, index|
           value = index + 1
-          var_board.col_values.each_with_index do |col_vars, col|
-            constraint_name = "value #{value} must be present once in col #{col}"
+          var_board.col_values.each do |col_vars|
+            constraint_name = "value #{value} must be present once per column"
             model.enforce(constraint_name => col_vars.inject(:+) == 1)
           end
         end
@@ -97,7 +106,7 @@ module Sudoku
         vars_boards.each_with_index do |var_board, index|
           value = index + 1
           var_board.box_values.each_with_index do |box_vars, box|
-            constraint_name = "value #{value} must be present once in box #{box}"
+            constraint_name = "value #{value} must be present once per box"
             model.enforce(constraint_name => box_vars.inject(:+) == 1)
           end
         end

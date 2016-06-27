@@ -46,7 +46,7 @@ module Sudoku
         b = Board.from_string(sudoku)
         p = Problem.new(b)
         expect(p.solve).to be_nil
-        expect(p.infeasibilty_reasons).to match ["value 1 must be present once in col 4",
+        expect(p.infeasibilty_reasons).to match ["value 1 must be present once per column",
                                                  "initial value (3, 4) <- 1",
                                                  "initial value (7, 4) <- 1"]
       end
